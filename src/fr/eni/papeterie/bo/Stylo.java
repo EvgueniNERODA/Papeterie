@@ -35,4 +35,16 @@ public class Stylo extends Article{
     //affichage
 
 
+    @Override
+    public String toString() {
+        return "Stylo{" +
+                "idArticle=" + idArticle +
+                ", marque='" + marque + '\'' +
+                ", reference='" + reference + '\'' +
+                ", designation='" + designation + '\'' +
+                ", prixUnitaire=" + prixUnitaire +
+                ", qteStock=" + qteStock +
+                ", couleur='" + couleur + '\'' +
+                '}';
+    }
 }

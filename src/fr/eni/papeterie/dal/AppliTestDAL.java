@@ -26,6 +26,7 @@ public class AppliTestDAL {
 		System.out.println("Ajout des articles... ");
 
 		try {
+
 			articleDAO.insert(a1);
 			System.out.println("Article ajouté  : " + a1.toString() );
 			articleDAO.insert(a2);
@@ -52,8 +53,8 @@ public class AppliTestDAL {
 			articleDAO.update(a1);
 			a1 = articleDAO.selectById(a1.getIdArticle());
 			System.out.println("Article après modification  : " + a1.toString() );
-			
-			/*
+
+
 			//Suppression d'un article
 			System.out.println("\nSuppression de l'article  : " + a1.toString());
 			articleDAO.delete(a1.getIdArticle());
@@ -61,7 +62,7 @@ public class AppliTestDAL {
 			System.out.println("Liste des articles après suppression : "  );
 			afficherArticles(articles);
 			System.out.println("---------------------------------------------------------------");
-*/
+
 			
 		} catch (Exception e) {
 			e.printStackTrace();
