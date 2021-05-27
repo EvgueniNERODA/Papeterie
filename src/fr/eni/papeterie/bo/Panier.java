@@ -11,7 +11,7 @@ public class Panier {
 
 
     //constructeurs
-
+    //initialisation de la liste dans le constructeur
     public Panier() {
         lignesPanier = new ArrayList<>();
     }
@@ -29,7 +29,9 @@ public class Panier {
 
     //méthode ajouter ligne au panier
     public void addLigne(Article article, int qte) {
+        //on crée uen instance de ligne
         Ligne ligneAdding = new Ligne(article, qte);
+        //on l'ajoute à la liste
         this.lignesPanier.add(ligneAdding);
     }
 
@@ -40,8 +42,6 @@ public class Panier {
 
     //méthode mise à jour d'une ligne(modifier la quantité en stock, augmente
     //ou diminue en fonction de cette nouvelle qté)
-
-
     public void updateLigne(int index, int newQte) {
         this.getLigne(index).setQte(newQte);
         //lignesPanier.add(newQte, lignesPanier.get(index)); erreur
