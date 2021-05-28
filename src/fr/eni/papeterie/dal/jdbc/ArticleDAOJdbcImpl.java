@@ -9,7 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ArticleDAOJdbcImpl {
-    private final String URL = "jdbc:sqlite:papeterie_db.sqlite";
+    private final String URL = Settings.getPropriete("url");
+    private final String SQL_DELETE = "DELETE FROM Article WHERE idArticle =?";
+    private final String SQL_UPDATE = "UPDATE Article SET reference =?, marque = ?, designation = ?, prixUnitaire = ?, qteStock = ?, grammage = ?, couleur = ? WHERE idArticle = ?;";
+    private final String SQL_INSERT = "INSERT INTO Article (reference, marque , designation , prixUnitaire , qteStock , grammage , couleur ) VALUES(?,?,?,?,?,?,?,?);";
 
     public List selectAll() {
         List<Article> listeArticle = new ArrayList<>();
@@ -60,7 +63,7 @@ public class ArticleDAOJdbcImpl {
     public Article selectById(int id) {
         Article article = null;
         try (Connection connection = DriverManager.getConnection(this.URL);
-                Statement etat = connection.createStatement()) {
+             Statement etat = connection.createStatement()) {
 
             //requète
             String sql = "SELECT idArticle, reference, marque, designation, prixUnitaire, qteStock, grammage, couleur," +
@@ -114,36 +117,31 @@ public class ArticleDAOJdbcImpl {
      */
     public void update(Article article) {
         //ouverture de la connection dans le try afin qu'ils soient fermés automatiquement
-        try (Connection cnx = DriverManager.getConnection(URL); Statement etat = cnx.createStatement()) {
+        try (Connection cnx = DriverManager.getConnection(URL); PreparedStatement etat = cnx.prepareStatement(this.SQL_UPDATE)) {
 
-            //initialisation de la variable type
-            String type = "";
+            etat.setString(1, article.getReference());
+            etat.setString(2, article.getMarque());
+            etat.setString(3, article.getDesignation());
+            etat.setFloat(4, article.getPrixUnitaire());
+            etat.setInt(5, article.getQteStock());
+            //si c'est un stylo Jaava mettra null à la place du 6 si s'est une ramette idem
+            etat.setInt(8, article.getIdArticle());
+
 
             //on vérifie quelle est l'instance de l'article
             //si l'article est un stylo on utilise la couleur qui se trouve dans la clase Stylo
             if (article instanceof Stylo) {
-                type = "couleur = ' " + ((Stylo) article).getCouleur() + "'";
+                etat.setString(7, ((Stylo) article).getCouleur());
             }
             //si l'article est une ramette on utilise le grammage qui se trouve dans la clase Ramette
             if (article instanceof Ramette) {
-                type = "grammage = " + ((Ramette) article).getGrammage() + " ";
+                etat.setInt(6, ((Ramette) article).getGrammage());
             }
 
-            //requète
-            String sql = "UPDATE Article SET " +
-                    "reference ='" + article.getReference() + "', " +
-                    "marque ='" + article.getMarque() + "', " +
-                    "designation ='" + article.getDesignation() + "', " +
-                    "qteStock =" + article.getQteStock() + "," +
-                    "prixUnitaire =" + article.getPrixUnitaire() + ", " +
-                    type +
-                    " WHERE idarticle =" + article.getIdArticle() + ";";
-
-
-            //pas de ResultSet par ce qu'on ne retourne rien
 
             //exectution de la requète
-            etat.executeUpdate(sql);
+            etat.executeUpdate();
+
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -157,36 +155,41 @@ public class ArticleDAOJdbcImpl {
 
     public void insert(Article article) {
         //si on mets la connection dans try elle sera fermé en sortant, idem pour l'état
-        try (Connection cnx = DriverManager.getConnection(this.URL); Statement etat = cnx.createStatement()) {
+        try (Connection cnx = DriverManager.getConnection(this.URL); PreparedStatement etat = cnx.prepareStatement(this.SQL_INSERT)) {// POUR SQL SERVEUR ajouter Statement.RETURN_GENERATED_KEYS
 
-            String type = "";
+            //on indique les valeurs des ?
+            etat.setString(1, article.getReference());
+            etat.setString(2, article.getMarque());
+            etat.setString(3, article.getDesignation());
+            etat.setFloat(4, article.getPrixUnitaire());
+            etat.setInt(5, article.getQteStock());
+            //si c'est un stylo Jaava mettra null à la place du 6 si s'est une ramette idem
+            etat.setInt(8, article.getIdArticle());
+
             if (article instanceof Ramette) {
-                type = ((Ramette) article).getGrammage() + ", null, 'RAMETTE'";
+                etat.setInt(6, ((Ramette) article).getGrammage());
+                etat.setString(8, "RAMETTE");
             }
             if (article instanceof Stylo) {
-                type = "null,'" + ((Stylo) article).getCouleur() + "','STYLO'";
+                etat.setString(7, ((Stylo) article).getCouleur());
+                etat.setString(8, "STYLO");
             }
 
-            String sql = "INSERT INTO Article" +
-                    "(reference, marque, designation, prixUnitaire, qteStock, grammage, couleur, type)" +
-                    " VALUES ('" +
-                    article.getReference() + "','" +
-                    article.getMarque() + "','" +
-                    article.getDesignation() + "'," +
-                    article.getPrixUnitaire() + "," +
-                    article.getQteStock() + "," +
-                    type + ");";
-            etat.executeUpdate(sql);
 
-            //récupère
+            etat.executeUpdate();
+
+            //récupère l'id autogénéré par l'insert mais cela retourne un ResulteSet
             ResultSet rs = etat.getGeneratedKeys();
 
             if (rs.next()) {
                 //get int renvoit un tableau avec les numéros de cases, on veut la première, qui correspond à l'id généré dans la bdd
+                //on le mets donc dans l'article en utilisant un setter
                 int id = rs.getInt(1);
 
                 //on modifie
                 article.setIdArticle(id);
+
+                //article.setIdArticle(rs.getInt(1)); même chose en plus court
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -205,10 +208,14 @@ public class ArticleDAOJdbcImpl {
         //ouverture de la connection dans le try afin qu'ils soient fermés automatiquement
         try (Connection connection = DriverManager.getConnection(URL); Statement etat = connection.createStatement()) {
 
-            String sql = "DELETE FROM Article WHERE idArticle =" + id + ";";
+            //on crée le PreparedStatement
+            PreparedStatement reqPreparee = connection.prepareStatement(this.SQL_DELETE);
 
-            System.out.println(sql);
-            etat.executeUpdate(sql);
+            //on indique que le premier ? correspond à l'id
+            reqPreparee.setInt(1, id);
+
+            //on execute la requète
+            reqPreparee.executeUpdate();
 
 
         } catch (SQLException e) {
