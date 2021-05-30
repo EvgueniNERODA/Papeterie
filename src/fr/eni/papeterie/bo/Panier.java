@@ -3,6 +3,16 @@ package fr.eni.papeterie.bo;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * classe panier, contient un constructeur pour créer un panier contenant plusieurs lignes d'articles(regroupés dans une Liste)
+ * contient une méthode d'ajout d'article
+ * contient une méthode pour séléctionner une ligne
+ * contient une méthode pour mettre à jour une ligne d'article
+ * contient une méthode pour supprimer une ligne d'aricle
+ * contient une méthode pour d'affichage du panier avec le montant total
+ *
+ * @author eneroda2021
+ */
 public class Panier {
 
     //attributs d'instance

@@ -1,2 +1,7 @@
-# Project exclude paths
-/out/
+*.class
+/.idea/
+/src/fr/eni/papeterie/dal/jdbc/settings.properties
+TPS.iml
+*.pdf
+/src/fr/eni/papeterie/dal/jdbc/Settings.java
+/out/production/TPS/fr/eni/papeterie/dal/settings.properties

@@ -20,6 +20,8 @@ public class Ramette extends Article{
         this.grammage = grammage;
     }
 
+
+
     //getter
 
     public int getGrammage() {

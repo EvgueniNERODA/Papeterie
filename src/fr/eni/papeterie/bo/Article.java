@@ -1,5 +1,12 @@
 package fr.eni.papeterie.bo;
 
+/**
+ * classe abstraite article
+ * contient des constructeurs, gettes, setters et une méthode d'affichage
+ *
+ * @author eneroda2021
+ * @version 1.0
+ */
 public abstract class Article {
     public int idArticle;
     public String marque;
